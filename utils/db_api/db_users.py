@@ -12,7 +12,7 @@ def create_session():
 def check_user(id_user: int):
     """
     Проверяет id в бд\n
-    :param id_user: id
+    :param id_user: id пользователя
     :return: True или False
     """
     db_sess = create_session()
@@ -26,9 +26,9 @@ def check_user(id_user: int):
 def add_user(id_user: int, username: str, first_name: str):
     """
     Добавляет пользователя в бд\n
-    :param id_user: id
-    :param username: username
-    :param first_name: first_name
+    :param id_user: id пользователя
+    :param username: username пользователя
+    :param first_name: first_name пользователя
     :return: add user in db
     """
     user = User()
@@ -44,6 +44,12 @@ def add_user(id_user: int, username: str, first_name: str):
 
 
 def add_game(id_user: int, game: str, count: int):
+    """
+    Добавляет игроку новую игру, и если он выиграл, то и к победам +1\n
+    :param id_user: id игрока
+    :param game: игра
+    :param count: счёт
+    """
     db_sess = create_session()
 
     db_sess.query(User).filter(User.id == id_user).update({'all_count': User.all_count + 1})
@@ -87,6 +93,12 @@ def add_game(id_user: int, game: str, count: int):
 
 
 def add_win(db_sess, id_user: int, casino=False):
+    """
+    Добавляет победу игроку\n
+    :param db_sess: сессия бд
+    :param id_user: id игрока
+    :param casino: слоты?
+    """
     if not casino:
         db_sess.query(User).filter(User.id == id_user).update({'win_count': User.win_count + 1})
     else:
@@ -97,6 +109,9 @@ def add_win(db_sess, id_user: int, casino=False):
 
 
 def return_all():
+    """
+    Возвращает всех пользователей
+    """
     db_sess = create_session()
     l1st = list(map(lambda x: [str(x.first_name), f'id{x.id}'], db_sess.query(User).all()))
     db_sess.close()
@@ -104,6 +119,9 @@ def return_all():
 
 
 def return_id():
+    """
+    Возвращает все id пользователей
+    """
     db_sess = create_session()
     l1st = list(map(lambda x: x.id, db_sess.query(User).all()))
     db_sess.close()
@@ -111,6 +129,9 @@ def return_id():
 
 
 def return_win():
+    """
+    Возвращает всех пользователей, попавших в "топ рейтинг"
+    """
     db_sess = create_session()
     l1st = list(map(lambda x: [str(x.first_name), str(x.id), x.all_count, x.win_count] if x.all_count else None,
                     db_sess.query(User).all()))
@@ -122,6 +143,10 @@ def return_win():
     return l1st[::-1]
 
 
-def deanon(id_user: int):
+def deanon(id_user: int) -> User:
+    """
+    Возвращает игрока в виде User\n
+    :param id_user: id игрока
+    """
     db_sess = create_session()
     return db_sess.query(User).filter(User.id == int(id_user)).first()

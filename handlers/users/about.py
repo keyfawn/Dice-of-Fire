@@ -1,6 +1,6 @@
 from loader import dp
 from loader import bot
-from data.config import rate, support_id
+from data.config import rate, support_id, channel_username
 
 from aiogram import types
 from handlers.users.start import anti_flood
@@ -18,6 +18,6 @@ async def about_command(message: types.Message):
 @dp.message_handler(regexp='☃ О нас')
 @dp.throttled(anti_flood, rate=rate)
 async def about_message(message: types.Message):
-    markup = create_markup('inline', 2, ['🚀 Наш канал', 'u3l*https://t.me/DiceOfFire'],
+    markup = create_markup('inline', 2, ['🚀 Наш канал', f'u3l*https://t.me/{channel_username}'],
                            *list(map(lambda x: ['💤 Поддержка', f'u3l*tg://user?id={x}'], support_id)))
     await bot.send_message(message.chat.id, users.text_about.format(message.chat.full_name), reply_markup=markup)
