@@ -9,13 +9,13 @@ from static.text import users
 from utils.inline_btn import create_markup
 
 
-@dp.message_handler(commands=['about'])
+@dp.message_handler(chat_type='private', commands=['about'])
 @dp.throttled(anti_flood, rate=rate)
 async def about_command(message: types.Message):
     await about_message(message)
 
 
-@dp.message_handler(regexp='☃ О нас')
+@dp.message_handler(chat_type='private', regexp='☃ О нас')
 @dp.throttled(anti_flood, rate=rate)
 async def about_message(message: types.Message):
     markup = create_markup('inline', 2, ['🚀 Наш канал', f'u3l*https://t.me/{channel_username}'],

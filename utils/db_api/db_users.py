@@ -140,6 +140,7 @@ def return_win():
     l1st = list(filter(lambda x: x[-1] / x[-2] if x else None, l1st))
     l1st = sorted(l1st, key=lambda x: x[-1] / x[-2])
 
+    db_sess.close()
     return l1st[::-1]
 
 
@@ -149,4 +150,18 @@ def deanon(id_user: int) -> User:
     :param id_user: id игрока
     """
     db_sess = create_session()
-    return db_sess.query(User).filter(User.id == int(id_user)).first()
+    user = db_sess.query(User).filter(User.id == int(id_user)).first()
+    db_sess.close()
+    return user
+
+
+def delete_user(user_id: int):
+    """
+    Удаляет игрока из бд/n
+    :param user_id: id игрока
+    """
+    db_sess = create_session()
+    user = deanon(user_id)
+    db_sess.delete(user)
+    db_sess.commit()
+    db_sess.close()

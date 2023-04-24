@@ -9,7 +9,7 @@ from static.text import admin
 from handlers.admin.start import AdminState
 
 
-@dp.message_handler(state=AdminState.one_mailing, chat_id=admins_id, content_types=['photo', 'text'])
+@dp.message_handler(chat_type='private', state=AdminState.one_mailing, chat_id=admins_id, content_types=['photo', 'text'])
 async def one_mailing_message(message: types.Message, state: FSMContext):
     if message.photo:
         await state.update_data(photo=message.photo[-1].file_id)
@@ -20,7 +20,7 @@ async def one_mailing_message(message: types.Message, state: FSMContext):
                          caption=admin.text_saved_mailing, reply_markup=markup)
 
 
-@dp.callback_query_handler(state=AdminState.one_mailing, chat_id=admins_id)
+@dp.callback_query_handler(chat_type='private', state=AdminState.one_mailing, chat_id=admins_id)
 async def one_mailing_callback(call: types.CallbackQuery, state: FSMContext):
     if call.data == 'cancel':
         data = await state.get_data()
@@ -30,7 +30,7 @@ async def one_mailing_callback(call: types.CallbackQuery, state: FSMContext):
         await user_callback(call, state)
 
 
-@dp.callback_query_handler(state=AdminState.one_mailing_button, chat_id=admins_id)
+@dp.callback_query_handler(chat_type='private', state=AdminState.one_mailing_button, chat_id=admins_id)
 async def one_mailing_button_callback(call: types.CallbackQuery, state: FSMContext):
     if call.data == 'yes':
         await AdminState.one_mailing_button_compilet.set()
@@ -47,7 +47,7 @@ async def one_mailing_button_callback(call: types.CallbackQuery, state: FSMConte
         await one_mailing_callback(call, state)
 
 
-@dp.message_handler(state=AdminState.one_mailing_button_compilet, chat_id=admins_id)
+@dp.message_handler(chat_type='private', state=AdminState.one_mailing_button_compilet, chat_id=admins_id)
 async def one_mailing_button_message(message: types.Message, state: FSMContext):
     if message.text == 'None':
         data = await state.get_data()
@@ -70,13 +70,13 @@ async def one_mailing_button_message(message: types.Message, state: FSMContext):
     await AdminState.is_good_mailing.set()
 
 
-@dp.callback_query_handler(state=AdminState.one_mailing_button_compilet, chat_id=admins_id)
+@dp.callback_query_handler(chat_type='private', state=AdminState.one_mailing_button_compilet, chat_id=admins_id)
 async def one_mailing_button_compilet_callback(call: types.CallbackQuery, state: FSMContext):
     if call.data == 'cancel':
         await one_mailing_callback(call, state)
 
 
-@dp.callback_query_handler(state=AdminState.is_good_mailing, chat_id=admins_id)
+@dp.callback_query_handler(chat_type='private', state=AdminState.is_good_mailing, chat_id=admins_id)
 async def one_mailing_good_callback(call: types.CallbackQuery, state: FSMContext):
     if call.data == 'yes':
         data = await state.get_data()

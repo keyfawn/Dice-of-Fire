@@ -23,7 +23,7 @@ class AdminState(StatesGroup):
 MAIN_MARKUP = create_markup('reply', 2, ['🎲 Играть'], ['⚡ Топ рейтинг'], ['⚒ Все пользователи'], ['📨 Рассылка'])
 
 
-@dp.message_handler(commands=['start'], chat_id=admins_id)
+@dp.message_handler(chat_type='private', commands=['start'], chat_id=admins_id)
 async def start_message(message: types.Message):
     if not db_users.check_user(message.chat.id):
         db_users.add_user(message.chat.id, message.chat.username, message.chat.full_name)

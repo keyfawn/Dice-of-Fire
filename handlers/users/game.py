@@ -14,7 +14,7 @@ from utils.db_api import db_users
 from handlers.admin.start import MAIN_MARKUP as admin_markup
 
 
-@dp.message_handler(regexp='🎲 Играть')
+@dp.message_handler(chat_type='private', regexp='🎲 Играть')
 @dp.throttled(anti_flood, rate=rate)
 async def games_message(message: types.Message):
     await UserState.games.set()
@@ -22,7 +22,7 @@ async def games_message(message: types.Message):
     await bot.send_message(message.chat.id, users.text_games, reply_markup=markup)
 
 
-@dp.message_handler(state=UserState.games, content_types=['dice', 'text'], is_forwarded=False)
+@dp.message_handler(chat_type='private', state=UserState.games, content_types=['dice', 'text'], is_forwarded=False)
 @dp.throttled(anti_flood, rate=rate)
 async def game_message(message: types.Message, state: FSMContext):
     if message.dice:
@@ -49,7 +49,7 @@ async def game_message(message: types.Message, state: FSMContext):
         await bot.send_message(message.chat.id, users.vote_games)
 
 
-@dp.message_handler(state=UserState.games, content_types=['dice', 'text'], is_forwarded=True)
+@dp.message_handler(chat_type='private', state=UserState.games, content_types=['dice', 'text'], is_forwarded=True)
 @dp.throttled(anti_flood, rate=rate)
 async def cheat_message(message: types.Message):
     await bot.send_message(message.chat.id, users.text_cheat)

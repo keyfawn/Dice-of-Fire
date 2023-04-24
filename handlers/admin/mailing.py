@@ -9,14 +9,14 @@ from static.text import admin
 from handlers.admin.start import AdminState
 
 
-@dp.message_handler(regexp='📨 Рассылка', chat_id=admins_id)
+@dp.message_handler(chat_type='private', regexp='📨 Рассылка', chat_id=admins_id)
 async def mailing_message(message: types.Message):
     markup = create_markup('inline', 1, ['❌ Отмена', 'cancel'])
     await bot.send_message(message.chat.id, admin.text_mailing, reply_markup=markup)
     await AdminState.mailing.set()
 
 
-@dp.callback_query_handler(state=AdminState.mailing, chat_id=admins_id)
+@dp.callback_query_handler(chat_type='private', state=AdminState.mailing, chat_id=admins_id)
 async def mailing_callback(call: types.CallbackQuery, state: FSMContext):
     if call.data == 'cancel':
         await call.answer(admin.cancel)
@@ -24,7 +24,7 @@ async def mailing_callback(call: types.CallbackQuery, state: FSMContext):
         await state.finish()
 
 
-@dp.message_handler(state=AdminState.mailing, chat_id=admins_id, content_types=['text', 'photo'])
+@dp.message_handler(chat_type='private', state=AdminState.mailing, chat_id=admins_id, content_types=['text', 'photo'])
 async def text_mailing_message(message: types.Message, state: FSMContext):
     if message.photo:
         await state.update_data(photo=message.photo[-1].file_id)
@@ -35,7 +35,7 @@ async def text_mailing_message(message: types.Message, state: FSMContext):
     await AdminState.mailing_button.set()
 
 
-@dp.callback_query_handler(state=AdminState.mailing_button, chat_id=admins_id)
+@dp.callback_query_handler(chat_type='private', state=AdminState.mailing_button, chat_id=admins_id)
 async def mailing_button_callback(call: types.CallbackQuery, state: FSMContext):
     if call.data == 'yes':
         await AdminState.mailing_button_compilet.set()
@@ -52,7 +52,7 @@ async def mailing_button_callback(call: types.CallbackQuery, state: FSMContext):
         await mailing_callback(call, state)
 
 
-@dp.message_handler(state=AdminState.mailing_button_compilet, chat_id=admins_id)
+@dp.message_handler(chat_type='private', state=AdminState.mailing_button_compilet, chat_id=admins_id)
 async def mailing_button_message(message: types.Message, state: FSMContext):
     if message.text == 'None':
         data = await state.get_data()
@@ -78,27 +78,27 @@ async def mailing_button_message(message: types.Message, state: FSMContext):
     await AdminState.is_good_mailing_all.set()
 
 
-@dp.callback_query_handler(state=AdminState.mailing_button_compilet, chat_id=admins_id)
+@dp.callback_query_handler(chat_type='private', state=AdminState.mailing_button_compilet, chat_id=admins_id)
 async def mailing_button_compilet_callback(call: types.CallbackQuery, state: FSMContext):
     if call.data == 'cancel':
         await mailing_callback(call, state)
 
 
-@dp.callback_query_handler(state=AdminState.is_good_mailing_all, chat_id=admins_id)
+@dp.callback_query_handler(chat_type='private', state=AdminState.is_good_mailing_all, chat_id=admins_id)
 async def mailing_good_callback(call: types.CallbackQuery, state: FSMContext):
     if call.data == 'yes':
         data = await state.get_data()
         await state.finish()
-        try:
-            for id_user in db_users.return_id():
+        for id_user in db_users.return_id():
+            try:
                 if 'photo' in data.keys():
                     await bot.send_photo(id_user, data['photo'], caption=data['text'], reply_markup=data['markup'],
                                          parse_mode='html')
                 else:
                     await bot.send_message(id_user, data['text'], reply_markup=data['markup'],
                                            parse_mode='html')
-        except Exception:
-            ...
+            except Exception:
+                ...
         await bot.edit_message_media(types.InputMediaPhoto(open('static/img/good_mailing.png', 'rb'),
                                                            caption=admin.text_good_mailing.format(
                                                                call.from_user.first_name)),

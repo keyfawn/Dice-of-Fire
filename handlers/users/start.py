@@ -22,7 +22,7 @@ async def anti_flood(*args, **kwargs):
     await message.answer(users.text_flood)
 
 
-@dp.message_handler(commands=['start'])
+@dp.message_handler(chat_type='private', commands=['start'])
 @dp.throttled(anti_flood, rate=rate)
 async def start_message(message: types.Message):
     if not db_users.check_user(message.chat.id):

@@ -8,6 +8,7 @@ from handlers.users.start import anti_flood
 from static.text import users
 from utils.inline_btn import create_markup
 from utils.db_api import db_users
+from utils.top_rating import check
 
 
 @dp.message_handler(commands=['rating'])
@@ -16,7 +17,7 @@ async def rating_command(message: types.Message):
     await rating_message(message)
 
 
-@dp.message_handler(regexp='⚡ Топ рейтинг')
+@dp.message_handler(chat_type='private', regexp='⚡ Топ рейтинг')
 @dp.throttled(anti_flood, rate=rate)
 async def rating_message(message: types.Message, target=None):
     top = db_users.return_win()
@@ -30,26 +31,16 @@ async def rating_message(message: types.Message, target=None):
                              reply_markup=markup)
 
 
-@dp.callback_query_handler()
+@dp.callback_query_handler(chat_type='private')
 @dp.throttled(anti_flood, rate=rate)
 async def rating_callback(call: types.CallbackQuery):
     if call.data[:2] == 'id':
         data = db_users.deanon(call.data[2:])
 
-        games = {'⚽': data.football,
-                 '🎯': data.darts,
-                 '🎲': data.dice,
-                 '🏀': data.basketball,
-                 '🎳': data.bowling,
-                 '🎰': data.slot}
-        maxi = max(games.values())
-        teht = ''
-        for game in games.keys():
-            if games[game] == maxi:
-                teht = teht + game
+        teht = check(data)
 
         ava = await bot.get_user_profile_photos(data.id)
-        markup = create_markup('inline', 2, ['⚔ Посмотреть', f'u3l*tg://user?id={data.id}'], ['❌ Назад', 'cancel'])
+        markup = create_markup('inline', 1, ['❌ Назад', 'cancel'])
 
         photo = ava.photos[0][-1].file_id if ava.photos else open('static/img/no_ava.png', 'rb')
         await bot.edit_message_media(types.InputMediaPhoto(photo, caption=users.text_top_info.format(
